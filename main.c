@@ -1,3 +1,4 @@
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -21,19 +22,27 @@ void cargarMaquinas(Maquina *m, int n) {
 	}
 }
 
+void cargarMaquina(Maquina *m) {
+	printf("\nNombre de la maquina: ");
+	scanf(" %49[^\n]", m->nombreMaquina);
+	
+	printf("Tension: ");
+	scanf("%f", &m->tension);
+	
+	printf("Corriente: ");
+	scanf("%f", &m->corriente);
+}
+
 void mostrarMaximos(Maquina *m, int n) {
 	int opcion, primero = -1, segundo = -1;
 	
-	printf("\nBuscar maximos de:\n1. Tension\n2. Corriente\n");
+	printf("\n1. Tension\n2. Corriente\n");
 	scanf("%d", &opcion);
 	
-	if (opcion != 1 && opcion != 2) {
-		printf("Opcion invalida\n");
-		return;
-	}
+	if (opcion != 1 && opcion != 2) return;
 	
 	for (int i = 0; i < n; i++) {
-		float valor = (opcion == 1) ? m[i].tension : m[i].corriente;
+		float valor = opcion == 1 ? m[i].tension : m[i].corriente;
 		
 		if (primero == -1 || valor > (opcion == 1 ? m[primero].tension : m[primero].corriente)) {
 			segundo = primero;
@@ -43,7 +52,7 @@ void mostrarMaximos(Maquina *m, int n) {
 		}
 	}
 	
-	printf("\nMayor: %.2f - %s\n",
+	printf("Mayor: %.2f - %s\n",
 		   opcion == 1 ? m[primero].tension : m[primero].corriente,
 		   m[primero].nombreMaquina);
 	
@@ -54,20 +63,58 @@ void mostrarMaximos(Maquina *m, int n) {
 	}
 }
 
-int main() {
-	int n;
+void buscarCaracter(Maquina *m, int n) {
+	char letra;
 	
-	printf("Cantidad de maquinas: ");
+	printf("Caracter a buscar: ");
+	scanf(" %c", &letra);
+	
+	for (int i = 0; i < n; i++) {
+		if (strchr(m[i].nombreMaquina, letra) != NULL)
+			printf("%s contiene %c\n", m[i].nombreMaquina, letra);
+	}
+}
+
+int main() {
+	int n, opcion;
+	Maquina *maquinas;
+	
+	printf("Cantidad inicial de maquinas: ");
 	scanf("%d", &n);
 	
-	Maquina *maquinas = malloc(n * sizeof(Maquina));
+	if (n <= 0) return 1;
 	
-	if (maquinas == NULL) {
-		return 1;
-	}
+	maquinas = malloc(n * sizeof(Maquina));
+	
+	if (maquinas == NULL) return 1;
 	
 	cargarMaquinas(maquinas, n);
-	mostrarMaximos(maquinas, n);
+	
+	do {
+		printf("\n1. Agregar maquina\n2. Mostrar maximos\n3. Buscar caracter\n4. Salir\n");
+		scanf("%d", &opcion);
+		
+		switch (opcion) {
+		case 1: {
+			Maquina *aux = realloc(maquinas, (n + 1) * sizeof(Maquina));
+			
+			if (aux != NULL) {
+				maquinas = aux;
+				cargarMaquina(&maquinas[n]);
+				n++;
+			}
+			break;
+		}
+		case 2:
+			mostrarMaximos(maquinas, n);
+			break;
+		case 3:
+			buscarCaracter(maquinas, n);
+			break;
+		}
+		
+	} while (opcion != 4);
+	
 	free(maquinas);
 	return 0;
 }
